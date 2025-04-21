@@ -1,13 +1,20 @@
-//! By convention, root.zig is the root source file when making a library. If
-//! you are making an executable, the convention is to delete this file and
-//! start with main.zig instead.
+const sexp = @import("wasm/sexp.zig");
+const WasmFile = @import("wasm/WasmFile.zig");
+const Exec = @import("wasm/Exec.zig");
+pub const Value = Exec.Value;
+pub fn compileModule(
+    data: []const u8,
+    alloc: std.mem.Allocator,
+) !WasmFile.WasmModule {
+    return WasmFile.decodeFile(data, alloc);
+}
+
+test {
+    const wat = @embedFile("wasm/wasm-wat-samples/loops/loops.wat");
+    var iter = sexp.TokenIter{ .data = wat };
+    errdefer std.log.err("{s}", .{iter.data[iter.idx..]});
+    while (try iter.next()) |t| {
+        std.log.err("{}", .{t});
+    }
+}
 const std = @import("std");
-const testing = std.testing;
-
-pub export fn add(a: i32, b: i32) i32 {
-    return a + b;
-}
-
-test "basic add functionality" {
-    try testing.expect(add(3, 7) == 10);
-}
